@@ -1,0 +1,17 @@
+{
+  "name": "apollo-cache-debug",
+  "private": true,
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.4",
+    "@pothos/core": "^3.38.0",
+    "@pothos/plugin-sub-graph": "^3.13.2",
+    "express": "^4.18.2",
+    "express-graphql": "^0.12.0",
+    "graphql": "^16.8.1",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
+  }
+}
