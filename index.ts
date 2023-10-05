@@ -22,11 +22,28 @@ export const builder = new SchemaBuilder<SchemaTypes>({
 
 builder.queryType({ subGraphs: ['subgraph1', 'subgraph2'] });
 
-const MyResponse = builder.objectRef<number>('MyResponse').implement({
+export interface MyType {
+  subtypes: MySubType[];
+}
+
+export interface MySubType {
+  name: string;
+}
+
+export const MySubTypeResponse = builder.objectRef<MySubType>('MySubTypeResponse').implement({
+  subGraphs: ['subgraph1'],
   fields: (t) => ({
+    name: t.exposeString("name"),
     value: t.int({
-      resolve: (value) => value,
+      resolve: (value) => 123,
     }),
+  })
+});
+
+export const MyResponse = builder.objectRef<MyType>('MyTypeResponse').implement({
+  subGraphs: ['subgraph1'],
+  fields: (t) => ({
+    subtypes: t.expose('subtypes', { type: [MySubTypeResponse], description: '' }),
   }),
 });
 
@@ -37,22 +54,26 @@ builder.queryField('someField', (t) => {
     args: {
       id: t.arg({
         type: 'ID',
+        required: true,
       }),
     },
-    resolve: (parent, { id }, context, info) => {
+    resolve: (parent, { id }, context, info): MyType => {
       //  does not work
       // @ts-expect-error
       info.cacheControl.setCacheHint({ maxAge: 123 });
 
-      // does not work either
-      // cacheControlFromInfo(info).setCacheHint({ maxAge: 123 });
-
-      return 123;
+      return {
+        subtypes: [{
+          name: 'name'
+        }]
+      }
     },
   });
 });
 
-const schema = builder.toSchema();
+const schema = builder.toSchema({
+  subGraph: ['subgraph1'],
+});
 
 const server = new ApolloServer({
   schema,
